@@ -1,0 +1,31 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("relayer has a balance field", function() {
+    expect(res.getBody()).to.have.property('relayerBalance');
+  });
+  test("relayer balance is not zero", function() {
+    const body = res.getBody();
+    expect(parseFloat(body.relayerBalance)).to.be.above(0);
+  });
+}
+
+docs {
+  Sanity check before anything else. If relayerBalance is 0, or this fails
+  entirely, stop and fix funding/RPC connection before testing anything
+  downstream — everything else depends on the relayer actually being funded
+  and reachable.
+}

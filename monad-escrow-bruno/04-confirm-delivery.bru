@@ -1,0 +1,37 @@
+meta {
+  name: Confirm Delivery (happy path)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/escrow/confirm
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "escrowId": "{{escrowId}}",
+    "buyerAddress": "{{testBuyerAddress}}"
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("status is released", function() {
+    expect(res.getBody().status).to.equal('released');
+  });
+  test("returns a valid txHash", function() {
+    expect(res.getBody().txHash).to.match(/^0x[a-fA-F0-9]{64}$/);
+  });
+}
+
+docs {
+  Depends on "Create Escrow (happy path)" having run first in this session —
+  it reads {{escrowId}} from that response via a post-response script. Use
+  Bruno's "Run Collection" to execute top-to-bottom on a fresh backend rather
+  than running this request alone.
+}

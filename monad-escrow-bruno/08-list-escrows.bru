@@ -1,0 +1,35 @@
+meta {
+  name: List Recent Escrows
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/escrow/list?limit=50
+  body: none
+  auth: none
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("returns an escrows array", function() {
+    expect(res.getBody().escrows).to.be.an('array');
+  });
+  test("respects the limit param", function() {
+    expect(res.getBody().escrows.length).to.be.at.most(50);
+  });
+}
+
+docs {
+  This is what your dashboard polls as a fallback if the WebSocket connection
+  drops mid-demo on flaky venue WiFi. Test it independently of the WS path so
+  you actually know the fallback works, rather than discovering it doesn't
+  live on stage.
+
+  Note: this collection is for correctness, not load. For the 130-person
+  concurrency proof, use the separate Promise.all load-test script from the
+  project brief (section 7) — Bruno's sequential runner isn't the right tool
+  for simulating simultaneous traffic.
+}

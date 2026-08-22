@@ -1,0 +1,31 @@
+meta {
+  name: Get Escrow by ID
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/escrow/{{escrowId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("status reflects Released", function() {
+    expect(res.getBody().status).to.equal('Released');
+  });
+  test("seller is always the fixed demo seller", function() {
+    expect(res.getBody().seller.toLowerCase()).to.equal(bru.getEnvVar('demoSellerAddress').toLowerCase());
+  });
+}
+
+docs {
+  The seller check here is a scope-lock test, not just a data check: it
+  should be the same fixed demo seller address on EVERY escrow, regardless of
+  who the buyer was. If this ever fails, something introduced per-request
+  seller selection — a pattern explicitly ruled out for the live demo (see
+  project brief section 3.5).
+}

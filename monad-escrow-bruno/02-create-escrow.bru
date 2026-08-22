@@ -1,0 +1,52 @@
+meta {
+  name: Create Escrow (happy path)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/escrow/create
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "buyerAddress": "{{testBuyerAddress}}",
+    "title": "Campus Lunch Delivery",
+    "amountMON": "0.05"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    bru.setVar("escrowId", res.getBody().escrowId);
+    bru.setVar("createTxHash", res.getBody().txHash);
+  }
+}
+
+tests {
+  test("status is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("returns an escrowId", function() {
+    expect(res.getBody()).to.have.property('escrowId');
+  });
+  test("returns a valid txHash", function() {
+    expect(res.getBody().txHash).to.match(/^0x[a-fA-F0-9]{64}$/);
+  });
+  test("status is funded", function() {
+    expect(res.getBody().status).to.equal('funded');
+  });
+  test("latency is reported", function() {
+    expect(res.getBody().latencyMs).to.be.a('number');
+  });
+}
+
+docs {
+  Note this request body has NO seller field. That's intentional — the server
+  must use its own fixed/configured demo seller address, never one supplied
+  by the client (see project brief section 3.5). If your backend requires a
+  seller in this body, that's a scope violation to fix in the backend, not
+  a reason to add it here.
+}

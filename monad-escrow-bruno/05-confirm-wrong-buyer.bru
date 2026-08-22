@@ -1,0 +1,37 @@
+meta {
+  name: Confirm Delivery - Wrong Buyer (should fail)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/escrow/confirm
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "escrowId": "{{escrowId}}",
+    "buyerAddress": "0x9999999999999999999999999999999999bEEF"
+  }
+}
+
+tests {
+  test("status is 400 or 403", function() {
+    expect(res.getStatus()).to.be.oneOf([400, 403]);
+  });
+  test("returns an error, not a release", function() {
+    expect(res.getBody()).to.have.property('error');
+  });
+}
+
+docs {
+  This is the most important test in the whole collection. It directly checks
+  the trustedRelayer + buyer-parameter auth model: someone else's address must
+  NOT be able to release funds from an escrow they didn't create, since the
+  relayer is always msg.sender on-chain and the real buyer identity only
+  exists as a parameter your backend must verify. If this returns 200, that's
+  a real fund-draining bug — stop and fix before demo day, this is not a
+  minor issue.
+}

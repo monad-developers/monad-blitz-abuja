@@ -1,0 +1,34 @@
+meta {
+  name: Confirm Delivery - Already Released (should fail)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/escrow/confirm
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "escrowId": "{{escrowId}}",
+    "buyerAddress": "{{testBuyerAddress}}"
+  }
+}
+
+tests {
+  test("status is 400 or 409", function() {
+    expect(res.getStatus()).to.be.oneOf([400, 409]);
+  });
+  test("returns an error, not a second release", function() {
+    expect(res.getBody()).to.have.property('error');
+  });
+}
+
+docs {
+  Run this right after the happy-path confirm (04). Confirming twice must not
+  release funds twice. The contract's status check should revert this on-chain
+  regardless, but this test proves your relayer surfaces it as a clean 4xx
+  error rather than crashing or, worse, silently returning 200.
+}
